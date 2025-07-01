@@ -20,23 +20,12 @@ class Owner(TypedDict):
     uri: str
 
 
-class TracksInfo(TypedDict):
-    href: str
-    total: int
+class PlaylistTrack(TypedDict):
+    id: str
+    name: str
+    artists: List[str]
 
 
 class Playlist(TypedDict):
-    collaborative: bool
-    description: str
-    external_urls: ExternalURLs
-    href: str
     id: str
-    images: List[Image]
     name: str
-    owner: Owner
-    primary_color: Optional[str]
-    public: bool
-    snapshot_id: str
-    tracks: TracksInfo
-    type: str
-    uri: str
