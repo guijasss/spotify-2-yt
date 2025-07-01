@@ -10,9 +10,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-CLIENT_ID = getenv("CLIENT_ID")
-CLIENT_SECRET = getenv("CLIENT_SECRET")
-REDIRECT_URI = getenv("REDIRECT_URI")
+CLIENT_ID = getenv("SPOTIFY_CLIENT_ID")
+CLIENT_SECRET = getenv("SPOTIFY_CLIENT_SECRET")
+REDIRECT_URI = getenv("SPOTIFY_REDIRECT_URI")
 SCOPE = "playlist-read-private playlist-read-collaborative"
 
 _auth_code = None
