@@ -1,7 +1,6 @@
 from typing import cast, List
-from requests import get, HTTPError
+from requests import get
 
-from src.spotify.auth import authenticate
 from src.spotify.entities import Playlist, PlaylistTrack
 
 
@@ -20,7 +19,8 @@ def fetch_user_playlists(access_token: str) -> List[Playlist]:
 
     return cast(List[Playlist], [{
         "id": p.get("id"),
-        "name": p.get("name")
+        "name": p.get("name"),
+        "description": p.get("description")
     } for p in playlists])
 
 def fetch_playlist_tracks(access_token: str, playlist_id: str) -> List[PlaylistTrack]:
@@ -42,22 +42,3 @@ def fetch_playlist_tracks(access_token: str, playlist_id: str) -> List[PlaylistT
         "name": p.get("track").get("name"),
         "artists": [artist.get("name") for artist in p.get("track").get("artists")]
     } for p in tracks])
-
-if __name__ == "__main__":
-    try:
-        tokens = authenticate()
-        playlists = fetch_user_playlists(tokens["access_token"])
-
-        data = fetch_playlist_tracks(tokens["access_token"], playlists[0]["id"])
-
-        print(data)
-
-        # print("\n🎵 Your Playlists:")
-        # for playlist in playlists:
-        #     print(f"- {playlist['name']} (ID: {playlist['id']})")
-
-    except HTTPError as e:
-        print(f"\n⚠️ HTTP Error: {e.response.status_code} - {e.response.text}\n")
-
-    except Exception as e:
-        print(f"\n⚠️ Unexpected error: {e}\n")

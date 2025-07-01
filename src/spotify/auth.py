@@ -73,7 +73,7 @@ def exchange_code_for_token(code):
     return response.json()
 
 
-def authenticate():
+def spotify_authenticate():
     global _auth_code
     _auth_code = None  # Reset authorization code
 

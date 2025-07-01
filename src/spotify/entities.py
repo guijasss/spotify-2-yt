@@ -29,3 +29,4 @@ class PlaylistTrack(TypedDict):
 class Playlist(TypedDict):
     id: str
     name: str
+    description: str

@@ -1,43 +1,76 @@
-from requests import get
+from requests import get, post
 from typing import Optional
-from os import getenv
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# Sua chave de API gerada no Google Cloud
-API_KEY = getenv("YOUTUBE_API_KEY")
 
 
-def search_video(query: str, max_results: int = 1) -> Optional[str]:
-    """
-    Busca um vídeo no YouTube e retorna o ID do primeiro resultado encontrado.
-    """
-    url = "https://www.googleapis.com/youtube/v3/search"
+def create_youtube_playlist(access_token: str, playlist_name: str, description: str = "") -> str:
+    url = "https://www.googleapis.com/youtube/v3/playlists"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
     params = {
-        "key": API_KEY,
+        "part": "snippet,status"  # Obrigatório informar quais partes do recurso estamos enviando
+    }
+    data = {
+        "snippet": {
+            "title": playlist_name,
+            "description": description
+        },
+        "status": {
+            "privacyStatus": "private"  # Ou "public", "unlisted"
+        }
+    }
+
+    response = post(url, headers=headers, params=params, json=data)
+    print(f"🔧 Status: {response.status_code}, Conteúdo: {response.text}")  # Log para depuração
+    response.raise_for_status()
+    playlist_id = response.json()["id"]
+    print(f"✅ Playlist criada: {playlist_name} (ID: {playlist_id})")
+    return playlist_id
+
+
+def search_youtube_video(access_token: str, query: str) -> Optional[str]:
+    url = "https://www.googleapis.com/youtube/v3/search"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    params = {
         "part": "snippet",
         "q": query,
         "type": "video",
-        "maxResults": max_results
+        "maxResults": 1
     }
 
-    response = get(url, params=params)
+    response = get(url, headers=headers, params=params)
     response.raise_for_status()
-    results = response.json().get("items", [])
+    items = response.json().get("items", [])
 
-    if not results:
+    if not items:
         print(f"⚠️ Nenhum vídeo encontrado para: {query}")
         return None
 
-    video_id = results[0]["id"]["videoId"]
+    video_id = items[0]["id"]["videoId"]
     print(f"🎬 Vídeo encontrado: https://youtu.be/{video_id}")
     return video_id
 
 
-if __name__ == "__main__":
-    while True:
-        query = input("\n🔎 Digite o nome da música e artista para buscar no YouTube (ou 'sair'): ").strip()
-        if query.lower() == "sair":
-            break
-        search_video(query)
+def add_video_to_playlist(access_token: str, playlist_id: str, video_id: str):
+    url = "https://www.googleapis.com/youtube/v3/playlistItems"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    params = {
+        "part": "snippet,status"  # Obrigatório informar quais partes do recurso estamos enviando
+    }
+    data = {
+        "snippet": {
+            "playlistId": playlist_id,
+            "resourceId": {
+                "kind": "youtube#video",
+                "videoId": video_id
+            }
+        }
+    }
+
+    response = post(url, headers=headers, params=params, json=data)
+    response.raise_for_status()
+    print(f"🎶 Vídeo adicionado à playlist: https://youtu.be/{video_id}")
